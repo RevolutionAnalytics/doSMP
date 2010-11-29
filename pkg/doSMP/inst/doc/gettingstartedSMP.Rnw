@@ -1,0 +1,289 @@
+% \VignetteIndexEntry{Getting Started with doSMP and foreach}
+% \VignetteDepends{doSMP}
+% \VignetteDepends{foreach}
+% \VignettePackage{doSMP}
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage[pdftex]{graphicx}
+\usepackage{color}
+\usepackage{xspace}
+\usepackage{url}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+    \usepackage[
+         colorlinks=true,
+         linkcolor=blue,
+         citecolor=blue,
+         urlcolor=blue]
+         {hyperref}
+         \usepackage{lscape}
+
+\usepackage{Sweave}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% define new colors for use
+\definecolor{darkgreen}{rgb}{0,0.6,0}
+\definecolor{darkred}{rgb}{0.6,0.0,0}
+\definecolor{lightbrown}{rgb}{1,0.9,0.8}
+\definecolor{brown}{rgb}{0.6,0.3,0.3}
+\definecolor{darkblue}{rgb}{0,0,0.8}
+\definecolor{darkmagenta}{rgb}{0.5,0,0.5}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\bld}[1]{\mbox{\boldmath $#1$}}
+\newcommand{\shell}[1]{\mbox{$#1$}}
+\renewcommand{\vec}[1]{\mbox{\bf {#1}}}
+
+\newcommand{\ReallySmallSpacing}{\renewcommand{\baselinestretch}{.6}\Large\normalsize}
+\newcommand{\SmallSpacing}{\renewcommand{\baselinestretch}{1.1}\Large\normalsize}
+
+\newcommand{\halfs}{\frac{1}{2}}
+
+\setlength{\oddsidemargin}{-.25 truein}
+\setlength{\evensidemargin}{0truein}
+\setlength{\topmargin}{-0.2truein}
+\setlength{\textwidth}{7 truein}
+\setlength{\textheight}{8.5 truein}
+\setlength{\parindent}{0.20truein}
+\setlength{\parskip}{0.10truein}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagestyle{fancy}
+\lhead{}
+\chead{Getting Started with doSMP and foreach}
+\rhead{}
+\lfoot{}
+\cfoot{}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Getting Started with doSMP and foreach}
+\author{Steve Weston \\ doc@revolutionanalytics.com}
+
+
+\begin{document}
+
+\maketitle
+
+\thispagestyle{empty}
+
+\section{Introduction}
+
+The \texttt{doSMP} package is a ``parallel backend'' for the
+\texttt{foreach} package.  It provides a mechanism needed to execute
+\texttt{foreach} loops in parallel.  The \texttt{foreach} package must
+be used in conjunction with a package such as \texttt{doSMP} in order to
+execute code in parallel.  The user must register a parallel backend to
+use, otherwise \texttt{foreach} will execute tasks sequentially, even
+when the \%dopar\% operator is used.\footnote{\texttt{foreach} will
+issue a warning that it is running sequentially if no parallel backend
+has been registered.  It will only issue this warning once, however.}
+
+It is important to note that the \texttt{doSMP} package only runs tasks
+on a single computer, not a cluster of computers.\footnote{You can use
+the \texttt{doNWS} package to execute on a cluster using the
+\texttt{nws} package.  \texttt{doNWS} is available from Revolution
+Analytics:
+\url{http://www.revolutionanalytics.com/products/parallel-r.php}.} That
+means that it is pointless to use \texttt{doSMP} on a machine with only
+one processor with a single core.  To get a speed improvement, it must
+run on a machine with multiple processors, multiple cores, or both.
+
+\section{Starting and stopping worker processes}
+
+To register \texttt{doSMP} to be used with \texttt{foreach}, you must
+first create a ``workers'' object by calling the \texttt{startWorkers}
+function.  \texttt{startWorkers} takes various arguments to specify the
+number of workers to start, verbose mode, etc.  If the number of workers
+isn't specified, it will start the number returned by
+\texttt{getOptions("cores")}.  Thus, you can use the standard
+\texttt{options} function to control the number of workers to start.  If
+the ``cores'' option isn't set either, than three workers are
+started.\footnote{The default value of three may change in the future to
+be the number of cores on the machine.  Currently, \texttt{doSMP} does
+not try to determine the number of cores.}
+
+It is important to explicitly stop the workers using the
+\texttt{stopWorkers} function before exiting from R.  If you forget,
+the workers will probably continued to execute, and you may also leak
+some IPC resources.
+
+When calling \texttt{startWorkers}, you may see a warning message that
+there are existing doSMP sessions.  That is important to know,
+because your performance will probably suffer if there is another
+parallel job running on your machine at the same time.  But it's also
+possible that a previous doSMP session wasn't properly shut down using
+\texttt{stopWorkers}.  If you know that the other job is defunct, you
+can shut it down using the \texttt{rmSessions} function.
+For example, if you get a warning message that there is an existing
+doSMP session using ``doSMP1'', you can shut down and clean up that previous
+session using the command \texttt{rmSessions('doSMP1')}.  You can clean up
+all sessions using \texttt{rmSessions(all=TRUE)}, but don't do that if you
+have a current session, because that will also shut down your current
+session.
+
+\section{Registering the \texttt{doSMP} parallel backend}
+
+Once you're started some workers, you must register \texttt{doSMP}
+to be used for parallel execution, specifying the ``workers'' object
+using the \texttt{registerDoSMP} function.
+
+Remember: unless \texttt{registerDoSMP} is called, \texttt{foreach} will
+{\em not} run in parallel.  Simply loading the \texttt{doSMP} package is
+not enough.
+
+\section{An example \texttt{doSMP} session}
+
+Before we go any further, let's load \texttt{doSMP}, start some
+workers, register \texttt{doSMP}, and use it with \texttt{foreach}:
+
+<<loadLibs>>=
+library(doSMP)
+w <- startWorkers(workerCount=4)
+registerDoSMP(w)
+foreach(i=1:3) %dopar% sqrt(i)
+@
+
+\begin{quote}
+Note well that this is {\em not} a practical use of \texttt{doSMP}.  This
+is my ``Hello, world'' program for parallel computing.  It tests that
+everything is installed and set up properly, but don't expect it to run
+faster than a sequential \texttt{for} loop, because it won't!
+\texttt{sqrt} executes far too quickly to be worth executing in
+parallel, even with a large number of iterations.  With small tasks, the
+overhead of scheduling the task and returning the result can be greater
+than the time to execute the task itself, resulting in poor performance.
+In addition, this example doesn't make use of the vector capabilities of
+\texttt{sqrt}, which it must to get decent performance.  This is just a
+test and a pedagogical example, {\em not} a benchmark.
+\end{quote}
+
+But returning to the point of this example, you can see that it is very
+simple to load \texttt{doSMP} with all of its dependencies
+(\texttt{foreach}, \texttt{iterators}, etc), and to register it.  For
+the rest of the R session, whenever you execute \texttt{foreach} with
+\texttt{\%dopar\%}, the tasks will be executed using \texttt{doSMP}.
+Note that you can register a different parallel backend later, or
+deregister \texttt{doSMP} by registering the sequential backend by
+calling the \texttt{registerDoSEQ} function.
+
+\section{A more serious example}
+
+Now that we've gotten our feet wet, let's do something a bit less
+trivial.  One good example is bootstrapping.  Let's see how long it
+takes to run 10,000 bootstrap iterations in parallel on
+\Sexpr{getDoParWorkers()} cores:
+
+<<bootpar>>=
+x <- iris[which(iris[,5] != "setosa"), c(1,5)]
+trials <- 10000
+
+chunkSize <- ceiling(trials / getDoParWorkers())
+smpopts <- list(chunkSize=chunkSize)
+
+ptime <- system.time({
+  r <- foreach(icount(trials), .combine=cbind, .options.smp=smpopts) %dopar% {
+    ind <- sample(100, 100, replace=TRUE)
+    result1 <- glm(x[ind,2]~x[ind,1], family=binomial(logit))
+    coefficients(result1)
+  }
+})[3]
+ptime
+@
+
+Using \texttt{doSMP} we were able to perform 10,000 bootstrap iterations
+in \Sexpr{ptime} seconds on \Sexpr{getDoParWorkers()} cores.  By
+changing the \texttt{\%dopar\%} to \texttt{\%do\%}, we can run the same
+code sequentially to determine the performance improvement:
+
+<<bootseq>>=
+stime <- system.time({
+  r <- foreach(icount(trials), .combine=cbind) %do% {
+    ind <- sample(100, 100, replace=TRUE)
+    result1 <- glm(x[ind,2]~x[ind,1], family=binomial(logit))
+    coefficients(result1)
+  }
+})[3]
+stime
+@
+
+The sequential version ran in \Sexpr{stime} seconds, which means the
+speed up is about \Sexpr{round(stime / ptime, digits=1)} on
+\Sexpr{getDoParWorkers()} workers.\footnote{If you build this vignette
+yourself, you can see how well this problem runs on your hardware.  None
+of the times are hardcoded in this document.  You can also run the same
+example which is in the examples directory of the \texttt{doSMP}
+distribution.} Ideally, the speed up would be \Sexpr{getDoParWorkers()},
+but no multicore CPUs are ideal, and neither are the operating systems
+and software that run on them.
+
+At any rate, this is a more realistic example that is worth executing in
+parallel.  I'm not going to explain what it's doing or how it works
+here.  I just want to give you something more substantial than the
+\texttt{sqrt} example in case you want to run some benchmarks yourself.
+You can also run this example on a cluster by simply registering a
+different parallel backend that supports clusters in order to take
+advantage of more processors.
+
+\section{Getting information about the parallel backend}
+
+To find out how many workers \texttt{foreach} is going to use, you can
+use the \texttt{getDoParWorkers} function:
+
+<<getDoParWorkers>>=
+getDoParWorkers()
+@
+
+This is a useful sanity check that you're actually running in parallel.
+If you haven't registered a parallel backend, or if your machine only
+has one core, \texttt{getDoParWorkers} will return one.  In either case,
+don't expect a speed improvement.  \texttt{foreach} is clever, but it
+isn't magic.
+
+The \texttt{getDoParWorkers} function is also useful when you want the
+number of tasks to be equal to the number of workers.  You may want to
+pass this value to an iterator constructor, for example.
+
+You can also get the name and version of the currently registered
+backend:
+
+<<getDoParName>>=
+getDoParName()
+getDoParVersion()
+@
+
+This is mostly useful for documentation purposes, or for checking that
+you have the most recent version of \texttt{doSMP}.
+
+\section{Specifying \texttt{doSMP} options}
+
+The \texttt{doSMP} package allows you to specify various options when
+running \texttt{foreach}: ``chunkSize'', ``info'', ``initEnvir'',
+``initArgs'', ``finalEnvir'', and ``finalArgs''.  You can learn about
+these options from the \texttt{doSMP} man page.  They are set using the
+\texttt{foreach} \texttt{.options.smp} argument.  Here's an example of
+how to do that:
+
+<<options>>=
+smpopts <- list(chunkSize=2)
+foreach(i=1:6, .options.smp=smpopts) %dopar% sqrt(i)
+@
+
+\section{Conclusion}
+
+The \texttt{doSMP} package provides a nice,
+efficient parallel programming platform for multiprocessor/multicore
+computers running operating systems such as Windows, Linux, and Mac OS
+X.  It is very easy to install, and very easy to use.  In short order,
+an average R programmer can start executing parallel programs, without
+any previous experience in parallel computing.
+
+<<stopworkers,echo=FALSE,results=hide>>=
+stopWorkers(w)
+@
+
+\end{document}

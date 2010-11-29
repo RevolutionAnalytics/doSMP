@@ -1,0 +1,2 @@
+export(registerDoSMP, startWorkers, stopWorkers, rmSessions)
+import(foreach)

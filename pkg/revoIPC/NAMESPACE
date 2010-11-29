@@ -1,0 +1,32 @@
+useDynLib(revoIPC)
+
+# Generic functions
+export(ipcCanFork, ipcFork)
+
+# Low-level API
+export(ipcTaskQueueCreate, ipcTaskQueueOpen)
+export(ipcTaskQueueShutdown, ipcTaskQueueRelease, ipcTaskQueueDestroy)
+export(ipcTaskStore, ipcTaskFetch)
+export(ipcTaskReturnResult)
+export(ipcTaskCheckResult, ipcTaskWaitResult)
+export(ipcTaskSetEnvironment)
+
+# Semaphores
+export(ipcSemaphoreCreate, ipcSemaphoreOpen)
+export(ipcSemaphoreRelease, ipcSemaphoreDestroy)
+export(ipcSemaphoreWait, ipcSemaphoreWaitTry)
+export(ipcSemaphorePost)
+
+# Mutexes
+export(ipcMutexCreate, ipcMutexOpen)
+export(ipcMutexLock, ipcMutexLockTry)
+export(ipcMutexUnlock)
+export(ipcMutexRelease, ipcMutexDestroy)
+
+# Message queues
+export(ipcMsgQueueCreate, ipcMsgQueueOpen)
+export(ipcMsgQueueRelease, ipcMsgQueueDestroy)
+export(ipcMsgSend, ipcMsgSendTry)
+export(ipcMsgReceive, ipcMsgReceiveTry)
+export(ipcMsgQueueGetCapacity, ipcMsgQueueGetCount)
+export(ipcMsgQueueGetMaxSize)

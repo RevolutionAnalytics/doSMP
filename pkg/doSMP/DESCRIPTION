@@ -1,0 +1,10 @@
+Package: doSMP
+Type: Package
+Title: Foreach parallel adaptor for the revoIPC package
+Version: 1.0-1
+Author: Revolution Analytics
+Maintainer: Revolution Analytics <packages@revolutionanalytics.com>
+Description: Provides a parallel backend for the %dopar% function using revoIPC
+Depends: R (>= 2.5.0), foreach(>= 1.3.0), iterators(>= 1.0.0),
+    revoIPC(>= 1.0-1), utils
+License: GPL-2
