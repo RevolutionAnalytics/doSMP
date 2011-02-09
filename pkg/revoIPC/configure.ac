@@ -1,4 +1,4 @@
-AC_INIT(revoIPC, 0.1, jed@revolution-computing.com)
+AC_INIT(revoIPC, 1.0-3, packages@revolution-computing.com)
 AC_PREREQ([2.13])
 
 AC_PROG_CC
