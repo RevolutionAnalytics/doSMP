@@ -61,7 +61,11 @@ union max_align
    int         int_;
    long        long_;
    #ifdef BOOST_HAS_LONG_LONG
+   #ifdef __GNUC__
+   __extension__ long long	long_long_;
+   #else
    long long   long_long_;
+   #endif
    #endif
    float       float_;
    double      double_;
