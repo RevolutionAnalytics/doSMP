@@ -144,9 +144,16 @@ doSMP <- function(obj, expr, envir, data) {
     }
   }
 
-  # execute the tasks
+  # compile the expression if we can load the compiler package
+  xpr <- if (suppressWarnings(require('compiler', quietly=TRUE)))
+    compile(expr, env=envir, options=list(suppressUndefined=TRUE))
+  else
+    expr
+
   options$verbose <- obj$verbose
-  engine(w, it, expr, exportenv, obj$packages, options)
+
+  # execute the tasks
+  engine(w, it, xpr, exportenv, obj$packages, options)
 
   # check for errors
   errorValue <- getErrorValue(it)
