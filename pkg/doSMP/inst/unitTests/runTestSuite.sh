@@ -13,7 +13,7 @@ cat('Starting test at', date(), '\n')
 cat(sprintf('doSMP version: %s\n', getDoParVersion()))
 cat(sprintf('Running with %d worker(s)\n', getDoParWorkers()))
 
-tests <- c('options.R', 'stressTest.R')
+tests <- c('optionsTest.R', 'stressTest.R')
 
 errcase <- list()
 for (f in tests) {
