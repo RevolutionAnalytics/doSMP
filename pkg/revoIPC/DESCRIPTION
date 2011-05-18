@@ -7,7 +7,8 @@ Maintainer: Revolution Analytics <packages@revolutionanalytics.com>
 Description: This package provides a fast parallel framework for multicore
              machines.
 Depends: R (>= 2.5), methods
-Suggests: RUnit, nws
+Suggests: RUnit
+Enhances: nws
 License: GPL-2
 LazyLoad: yes
 URL: http://www.revolutionanalytics.com
