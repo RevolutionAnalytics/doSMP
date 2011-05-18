@@ -1,12 +1,13 @@
 Package: revoIPC
 Type: Package
 Title: Shared memory parallel framework for multicore machines
-Version: 1.0-3
+Version: 1.0-4
 Author: Revolution Analytics
 Maintainer: Revolution Analytics <packages@revolutionanalytics.com>
 Description: This package provides a fast parallel framework for multicore
              machines.
 Depends: R (>= 2.5), methods
+Suggests: RUnit, nws
 License: GPL-2
 LazyLoad: yes
 URL: http://www.revolutionanalytics.com
