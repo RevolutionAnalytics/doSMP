@@ -18,6 +18,12 @@ makeDotsEnv <- function(...) {
   function() NULL
 }
 
+comp <- if (getRversion() < "2.13.0") {
+  function(expr, ...) expr
+} else {
+  compiler::compile
+}
+
 doSMP <- function(obj, expr, envir, data) {
   info <- obj$verbose
   w <- data
@@ -144,11 +150,8 @@ doSMP <- function(obj, expr, envir, data) {
     }
   }
 
-  # compile the expression if we can load the compiler package
-  xpr <- if (suppressWarnings(require('compiler', quietly=TRUE)))
-    compile(expr, env=envir, options=list(suppressUndefined=TRUE))
-  else
-    expr
+  # compile the expression if we're using R 2.13.0 or greater
+  xpr <- comp(expr, env=envir, options=list(suppressUndefined=TRUE))
 
   options$verbose <- obj$verbose
 
