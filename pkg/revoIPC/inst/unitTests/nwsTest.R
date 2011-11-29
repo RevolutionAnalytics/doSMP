@@ -2,6 +2,36 @@ library(RUnit)
 library(revoIPC)
 library(nws)
 
+force.create.sem <- function(name, count) {
+    sem <- tryCatch(ipcSemaphoreCreate(name, count), error=function(e) NULL)
+    if (is.null(sem)) {
+        sem <- ipcSemaphoreOpen(name)
+        ipcSemaphoreDestroy(sem)
+        sem <- ipcSemaphoreCreate(name, count)
+    }
+    sem
+}
+
+force.create.mutex <- function(name, rec) {
+    mut <- tryCatch(ipcMutexCreate(name, rec), error=function(e) NULL)
+    if (is.null(mut)) {
+        mut <- ipcMutexOpen(name, rec)
+        ipcMutexDestroy(mut)
+        mut <- ipcMutexCreate(name, rec)
+    }
+    mut
+}
+
+force.create.mq <- function(name, maxmsg, maxsize) {
+    mq <- tryCatch(ipcMsgQueueCreate(name, maxmsg, maxsize), error=function(e) NULL)
+    if (is.null(mq)) {
+        mq <- ipcMsgQueueOpen(name)
+        ipcMsgQueueDestroy(mq)
+        mq <- ipcMsgQueueCreate(name, maxmsg, maxsize)
+    }
+    mq
+}
+
 helper.sem.allblock <- function() {
     library(revoIPC)
     # publishEvent <- function(ev) { nwsStore(SleighUserNws, 'events', ev)
