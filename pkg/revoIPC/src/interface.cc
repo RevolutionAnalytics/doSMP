@@ -12,7 +12,7 @@
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 
-using queue::MessageHandle;
+using revoqueue::MessageHandle;
 
 #define CHECK_TAG_TYPE
 
@@ -153,11 +153,11 @@ namespace {
 
 extern "C" SEXP q_release(SEXP sexp_q);
 template<>
-char const * const Wrapper<queue::QueueHandle>::TAG_NAME    = "queue";
+char const * const Wrapper<revoqueue::QueueHandle>::TAG_NAME    = "queue";
 template<>
-char const * const Wrapper<queue::QueueHandle>::DESCRIPTION = "queue";
+char const * const Wrapper<revoqueue::QueueHandle>::DESCRIPTION = "queue";
 template<>
-R_CFinalizer_t Wrapper<queue::QueueHandle>::FINALIZER = (R_CFinalizer_t) q_release;
+R_CFinalizer_t Wrapper<revoqueue::QueueHandle>::FINALIZER = (R_CFinalizer_t) q_release;
 
 extern "C"
 SEXP q_create(SEXP sexp_name,
@@ -218,7 +218,7 @@ SEXP q_create(SEXP sexp_name,
     }
 
     try {
-        queue::QueueHandle *q = new queue::QueueHandle(name,
+        revoqueue::QueueHandle *q = new revoqueue::QueueHandle(name,
                                                        tmpdir,
                                                        mem_size,
                                                        max_tasks,
@@ -246,7 +246,7 @@ SEXP q_open(SEXP sexp_name)
     }
 
     try {
-        queue::QueueHandle *q = new queue::QueueHandle(name);
+        revoqueue::QueueHandle *q = new revoqueue::QueueHandle(name);
         return wrap_object(q);
     }
     catch (boost::interprocess::interprocess_exception e)
@@ -258,7 +258,7 @@ SEXP q_open(SEXP sexp_name)
 extern "C"
 SEXP q_destroy(SEXP sexp_q)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q != NULL)
     {
         R_ClearExternalPtr(sexp_q);
@@ -273,7 +273,7 @@ SEXP q_destroy(SEXP sexp_q)
 extern "C"
 SEXP q_release(SEXP sexp_q)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q != NULL)
     {
         R_ClearExternalPtr(sexp_q);
@@ -287,7 +287,7 @@ SEXP q_release(SEXP sexp_q)
 extern "C"
 SEXP q_shutdown(SEXP sexp_q)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -300,7 +300,7 @@ SEXP q_shutdown(SEXP sexp_q)
 extern "C"
 SEXP q_enqueue(SEXP sexp_q, SEXP data)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -322,7 +322,7 @@ SEXP q_enqueue(SEXP sexp_q, SEXP data)
 extern "C"
 SEXP q_dequeue(SEXP sexp_q)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -334,7 +334,7 @@ SEXP q_dequeue(SEXP sexp_q)
         m = q->dequeue();
         return wrap_task(m);
     }
-    catch(queue::ShutdownException se)
+    catch(revoqueue::ShutdownException se)
     {
         return R_NilValue;
     }
@@ -343,7 +343,7 @@ SEXP q_dequeue(SEXP sexp_q)
 extern "C"
 SEXP q_getTaskEnvironment(SEXP sexp_q, SEXP task)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -374,7 +374,7 @@ SEXP q_getTaskEnvironment(SEXP sexp_q, SEXP task)
 extern "C"
 SEXP q_getTaskData(SEXP sexp_q, SEXP task)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -400,7 +400,7 @@ SEXP q_getTaskData(SEXP sexp_q, SEXP task)
 extern "C"
 SEXP q_getId(SEXP sexp_q, SEXP task)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -421,7 +421,7 @@ SEXP q_getId(SEXP sexp_q, SEXP task)
 extern "C"
 SEXP q_returnResult(SEXP sexp_q, SEXP task, SEXP response)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -454,7 +454,7 @@ SEXP q_returnResult(SEXP sexp_q, SEXP task, SEXP response)
         q->return_result(m);
         return ScalarLogical(1);
     }
-    catch (queue::ShutdownException e)
+    catch (revoqueue::ShutdownException e)
     {
         return ScalarLogical(0);
     }
@@ -463,7 +463,7 @@ SEXP q_returnResult(SEXP sexp_q, SEXP task, SEXP response)
 extern "C"
 SEXP q_checkResult(SEXP sexp_q)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -480,7 +480,7 @@ SEXP q_checkResult(SEXP sexp_q)
 extern "C"
 SEXP q_waitResult(SEXP sexp_q)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -497,7 +497,7 @@ SEXP q_waitResult(SEXP sexp_q)
 extern "C"
 SEXP q_getResultData(SEXP sexp_q, SEXP task)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -522,7 +522,7 @@ SEXP q_getResultData(SEXP sexp_q, SEXP task)
 extern "C"
 SEXP q_discardResult(SEXP sexp_q, SEXP task)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -550,7 +550,7 @@ SEXP q_discardResult(SEXP sexp_q, SEXP task)
 extern "C"
 SEXP q_setEnvironment(SEXP sexp_q, SEXP sexp_task)
 {
-    queue::QueueHandle *q = Wrapper<queue::QueueHandle>::unwrap(sexp_q);
+    revoqueue::QueueHandle *q = Wrapper<revoqueue::QueueHandle>::unwrap(sexp_q);
     if (q == NULL)
     {
         error("The task queue has been freed.");
@@ -1606,7 +1606,7 @@ SEXP ipc_mqueue_get_num_msgs(SEXP r_mq)
     }
 }
 
-};
+}
 
 R_CallMethodDef callMethods[] = {
     {"create",          (void *(*)()) & q_create,                   5},

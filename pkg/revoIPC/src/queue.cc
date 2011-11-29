@@ -40,20 +40,20 @@ union semun {
 };
 #endif
 
-static void sysv_sem_wait(queue::SemaphoreType *mtx)
+static void sysv_sem_wait(revoqueue::SemaphoreType *mtx)
 {
     struct sembuf ctl_buf = { mtx->sem_idx, -1, SEM_UNDO };
     semop(mtx->sem_handle, & ctl_buf, 1);
 }
 
-static bool sysv_sem_poll(queue::SemaphoreType *mtx)
+static bool sysv_sem_poll(revoqueue::SemaphoreType *mtx)
 {
     struct sembuf ctl_buf = { mtx->sem_idx, -1, SEM_UNDO | IPC_NOWAIT };
     bool success = (semop(mtx->sem_handle, & ctl_buf, 1) != -1);
     return success;
 }
 
-static void sysv_sem_post(queue::SemaphoreType *mtx)
+static void sysv_sem_post(revoqueue::SemaphoreType *mtx)
 {
     struct sembuf ctl_buf = { mtx->sem_idx, 1, SEM_UNDO };
     semop(mtx->sem_handle, & ctl_buf, 1);
@@ -213,9 +213,9 @@ namespace {
 
     /* Buffer details */
     char const BUFFER_NAME[]                = "QueueBuf";
-};
+}
 
-namespace queue {
+namespace revoqueue {
 
     void MessageHandle::set_data(char const *msg, int len)
     {
@@ -782,4 +782,4 @@ namespace queue {
         }
         return _environment;
     }
-};
+}

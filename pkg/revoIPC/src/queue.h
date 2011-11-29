@@ -42,7 +42,7 @@ using boost::interprocess::offset_ptr;
 using boost::interprocess::named_semaphore;
 using boost::interprocess::named_mutex;
 
-namespace queue {
+namespace revoqueue {
 
     typedef boost::interprocess::allocator<char, managed_shared_memory::segment_manager> 
                       CharAllocator;
@@ -569,6 +569,6 @@ namespace queue {
         /* Message handle for environment. */
         MessageHandle                  *_environment;
     };
-};
+}
 
 #endif
