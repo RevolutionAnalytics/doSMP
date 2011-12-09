@@ -120,6 +120,23 @@ stopWorkers <- function(obj) {
   invisible(s)
 }
 
+showSessions <- function()
+{
+  val <- NULL
+  for (qname in QNAMES) {
+    tryCatch({
+      taskq <- ipcTaskQueueOpen(qname)
+      if (!is.null(taskq)) {
+         val <- c(val, qname)
+		 ipcTaskQueueRelease(taskq)
+	  }
+  },
+  error=function(e) {
+    cat("failed to open task queue ", qname)
+  }) 
+  }
+  val
+}
 # a rather dangerous function
 rmSessions <- function(qnames=NULL, all.names=FALSE) {
   d <- character(0)
@@ -162,11 +179,12 @@ rmSessions <- function(qnames=NULL, all.names=FALSE) {
       s <- sapply(QNAMES, rmSession)
       d <- QNAMES[s]   # deleted
 
-      if (length(d) > 0)
+      if (length(d) > 0) {
         cat(sprintf('successfully deleted queues: %s\n',
                     paste(QNAMES[s], collapse=', ')))
-      else
+      } else {
         cat('no queues were deleted\n')
+	  }
     } else {
       warning('rmSessions does nothing unless qnames is specified',
               ' or all.names is TRUE')
