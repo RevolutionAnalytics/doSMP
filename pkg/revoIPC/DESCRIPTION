@@ -1,7 +1,7 @@
 Package: revoIPC
 Type: Package
 Title: Shared memory parallel framework for multicore machines
-Version: 1.0-4
+Version: 1.0-5
 Author: Revolution Analytics
 Maintainer: Revolution Analytics <packages@revolutionanalytics.com>
 Description: This package provides a fast parallel framework for multicore

@@ -1,3 +1,4 @@
+if ("nws" %in% row.names(installed.packages()) && compareVersion(installed.packages()["nws", "Version"],"2.0") >= 0) {
 library(RUnit)
 library(revoIPC)
 library(nws)
@@ -300,4 +301,4 @@ test.mq.block <- function() {
     ipcMsgQueueDestroy(mq1)
     ipcMsgQueueDestroy(mq2)
 }
-
+}
